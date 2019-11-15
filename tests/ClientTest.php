@@ -31,7 +31,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->logger = $this->createMock(LoggerInterface::class);
 
         $this->client = new Client(
-            new Options('api_key', ['url' => 'http://localhost', 'flush_on_shutdown' => false]),
+            new Options('api_key', ['url' => 'http://localhost']),
             $this->httpClient,
             $this->logger
         );
@@ -68,7 +68,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $options = new Options('api_key',
             [
                 'url'               => 'http://localhost',
-                'flush_on_shutdown' => false,
                 'max_batch_size'    => 2,
             ]
         );
@@ -87,7 +86,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $options = new Options('api_key',
             [
                 'url'               => 'http://localhost',
-                'flush_on_shutdown' => false,
                 'max_batch_size'    => 2,
             ]
         );
@@ -121,7 +119,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $options = new Options('api_key',
             [
                 'url'               => 'http://localhost',
-                'flush_on_shutdown' => false,
                 'max_batch_size'    => 1,
             ]
         );
