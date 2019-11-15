@@ -2,13 +2,13 @@
 
 namespace Jlis\Quickmetrics\Tests;
 
-use Psr\Log\LoggerInterface;
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
 use GuzzleHttp\Psr7\Request;
 use Jlis\Quickmetrics\Client;
-use Jlis\Quickmetrics\Options;
-use GuzzleHttp\ClientInterface;
 use Jlis\Quickmetrics\Exception\RequestException;
-use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
+use Jlis\Quickmetrics\Options;
+use Psr\Log\LoggerInterface;
 
 class ClientTest extends \PHPUnit_Framework_TestCase
 {
@@ -35,7 +35,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             $this->httpClient,
             $this->logger
         );
-
     }
 
     public function test_it_collects_events()

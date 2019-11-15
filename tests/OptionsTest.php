@@ -23,7 +23,7 @@ class OptionsTest extends \PHPUnit_Framework_TestCase
      * @dataProvider customValuesProvider
      *
      * @param string $name
-     * @param mixed $value
+     * @param mixed  $value
      */
     public function test_it_sets_custom_values($name, $value)
     {
@@ -51,7 +51,7 @@ class OptionsTest extends \PHPUnit_Framework_TestCase
      * @dataProvider invalidOptionTypesProvider
      *
      * @param string $name
-     * @param mixed $value
+     * @param mixed  $value
      * @param string $expectedType
      * @param string $actualType
      */

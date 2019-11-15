@@ -17,7 +17,7 @@ final class Options
 
     /**
      * @param string $apiKey
-     * @param array $options
+     * @param array  $options
      */
     public function __construct($apiKey, array $options = [])
     {
