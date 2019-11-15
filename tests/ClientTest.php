@@ -7,7 +7,6 @@ use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
 use GuzzleHttp\Psr7\Request;
 use Jlis\Quickmetrics\Client;
 use Jlis\Quickmetrics\Exception\RequestException;
-use Jlis\Quickmetrics\Options;
 use Psr\Log\LoggerInterface;
 
 class ClientTest extends \PHPUnit_Framework_TestCase
@@ -31,7 +30,8 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->logger = $this->createMock(LoggerInterface::class);
 
         $this->client = new Client(
-            new Options('api_key', ['url' => 'http://localhost']),
+            'api_key',
+            ['url' => 'http://localhost'],
             $this->httpClient,
             $this->logger
         );
@@ -63,16 +63,21 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         ], $this->client->getEvents());
     }
 
+    public function test_it_doesnt_flush_when_there_are_no_events()
+    {
+        $this->httpClient->expects(static::never())
+            ->method('request');
+
+        $this->client->flush();
+    }
+
     public function test_it_doesnt_flush_when_max_batch_size_not_reached()
     {
-        $options = new Options('api_key',
-            [
-                'url'               => 'http://localhost',
-                'max_batch_size'    => 2,
-            ]
-        );
+        $client = new Client('api_key', [
+            'url'            => 'http://localhost',
+            'max_batch_size' => 2,
+        ], $this->httpClient, $this->logger);
 
-        $client = new Client($options, $this->httpClient, $this->logger);
         $timestamp = time();
 
         $this->httpClient->expects(static::never())
@@ -83,14 +88,11 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function test_it_flushes_when_max_batch_size_is_reached()
     {
-        $options = new Options('api_key',
-            [
-                'url'               => 'http://localhost',
-                'max_batch_size'    => 2,
-            ]
-        );
+        $client = new Client('api_key', [
+            'url'            => 'http://localhost',
+            'max_batch_size' => 2,
+        ], $this->httpClient, $this->logger);
 
-        $client = new Client($options, $this->httpClient, $this->logger);
         $timestamp = time();
 
         $this->httpClient->expects(static::once())
@@ -116,14 +118,10 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function test_it_throws_a_request_exception_when_the_request_fails()
     {
-        $options = new Options('api_key',
-            [
-                'url'               => 'http://localhost',
-                'max_batch_size'    => 1,
-            ]
-        );
-
-        $client = new Client($options, $this->httpClient, $this->logger);
+        $client = new Client('api_key', [
+            'url'            => 'http://localhost',
+            'max_batch_size' => 1,
+        ], $this->httpClient, $this->logger);
 
         $this->httpClient->expects(static::once())
             ->method('request')

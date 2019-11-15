@@ -26,12 +26,16 @@ final class Client
      */
     private $logger;
 
+    /**
+     * @param string $apiKey
+     */
     public function __construct(
-        Options $options,
+        $apiKey,
+        array $options = [],
         ClientInterface $httpClient = null,
         LoggerInterface $logger = null
     ) {
-        $this->options = $options;
+        $this->options = new Options($apiKey, $options);
         $this->httpClient = $httpClient ?: new \GuzzleHttp\Client([
             'headers'         => ['X-QM-KEY' => $options->getApiKey()],
             'timeout'         => $options->getTimeout(),
@@ -69,7 +73,7 @@ final class Client
 
         $maxBatchSize = $this->options->getMaxBatchSize();
         if ($maxBatchSize && $this->countEventValues() >= $maxBatchSize) {
-            $this->flush(false);
+            $this->flush();
         }
     }
 
@@ -91,12 +95,10 @@ final class Client
     /**
      * Send the current batch of events to Quickmetrics.
      *
-     * @param bool $failSilent
-     *
      * @throws \Throwable
      * @throws RequestException
      */
-    public function flush($failSilent = true)
+    public function flush()
     {
         if (! $this->countEventValues() || ! $this->httpClient) {
             return;
@@ -117,9 +119,7 @@ final class Client
                 ]);
             }
 
-            if (! $failSilent) {
-                throw RequestException::fromGuzzleRequestException($exception);
-            }
+            throw RequestException::fromGuzzleRequestException($exception);
         } catch (\Throwable $exception) {
             if ($this->logger) {
                 $this->logger->error('Cannot send metrics to Quickmetrics.', [
@@ -128,9 +128,7 @@ final class Client
                 ]);
             }
 
-            if (! $failSilent) {
-                throw $exception;
-            }
+            throw $exception;
         }
     }
 
