@@ -44,7 +44,9 @@ final class Client
         $this->logger = $logger;
 
         if ($options->isFlushableOnShutdown()) {
-            register_shutdown_function(\Closure::fromCallable([$this, 'flush']));
+            register_shutdown_function(function() {
+                $this->flush();
+            });
         }
     }
 
