@@ -43,6 +43,8 @@ final class Options
         $resolver->setAllowedTypes('timeout', 'int');
         $resolver->setAllowedTypes('connect_timeout', 'int');
         $resolver->setAllowedTypes('flush_on_shutdown', 'bool');
+
+        $resolver->setAllowedValues('url', \Closure::fromCallable([$this, 'validateUrl']));
     }
 
     /**
@@ -99,5 +101,15 @@ final class Options
     public function isFlushableOnShutdown()
     {
         return $this->options['flush_on_shutdown'];
+    }
+
+    /**
+     * @param string $url
+     *
+     * @return bool
+     */
+    private function validateUrl($url)
+    {
+        return filter_var($url, FILTER_VALIDATE_URL);
     }
 }

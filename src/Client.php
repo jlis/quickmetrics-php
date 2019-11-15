@@ -4,51 +4,96 @@ namespace Jlis\Quickmetrics;
 
 use Psr\Log\LoggerInterface;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\GuzzleException;
 use Jlis\Quickmetrics\Exception\RequestException;
 use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
 
-class Client
+final class Client
 {
     /**
      * @var Options
      */
-    private static $options;
+    private $options;
     /**
      * @var ClientInterface|null
      */
-    private static $client;
+    private $httpClient;
     /**
      * @var array
      */
-    private static $events = [];
+    private $events = [];
     /**
      * @var LoggerInterface|null
      */
-    private static $logger;
+    private $logger;
 
     /**
      * Initializes the Quickmetrics client.
      *
      * @param Options $options
-     * @param ClientInterface|null $client
+     * @param ClientInterface|null $httpClient
      * @param LoggerInterface $logger
      */
-    public static function init(Options $options, ClientInterface $client = null, LoggerInterface $logger = null)
+    public function __construct(Options $options, ClientInterface $httpClient = null, LoggerInterface $logger = null)
     {
-        self::$options = $options;
-        self::$client = $client ?: new \GuzzleHttp\Client([
+        $this->options = $options;
+        $this->httpClient = $httpClient ?: new \GuzzleHttp\Client([
             'headers'         => ['X-QM-KEY' => $options->getApiKey()],
             'timeout'         => $options->getTimeout(),
             'connect_timeout' => $options->getConnectTimeout(),
         ]);
-        self::$logger = $logger;
+        $this->logger = $logger;
 
         if ($options->isFlushableOnShutdown()) {
-            register_shutdown_function(static function () {
-                self::flush(true);
-            });
+            register_shutdown_function(\Closure::fromCallable([$this, 'flush']));
         }
+    }
+
+    /**
+     * Tracks a event with the current timestamp.
+     *
+     * @param string $name
+     * @param float|int $value
+     * @param string|null $dimension
+     * @param int|null $timestamp
+     *
+     * @throws \Throwable
+     * @throws RequestException
+     */
+    public function event($name, $value, $dimension = null, $timestamp = null)
+    {
+        $key = $name . $dimension;
+
+        if (isset($this->events[$key])) {
+            $this->events[$key]['values'][] = [$timestamp ?: time(), $value];
+        } else {
+            $this->events[$key] = [
+                'name'      => $name,
+                'dimension' => $dimension,
+                'values'    => [
+                    [$timestamp ?: time(), $value],
+                ],
+            ];
+        }
+
+        $maxBatchSize = $this->options->getMaxBatchSize();
+        if ($maxBatchSize && $this->countEventValues() >= $maxBatchSize) {
+            $this->flush(false);
+        }
+    }
+
+    /**
+     * Counts the actual values in the events.
+     *
+     * @return int
+     */
+    private function countEventValues()
+    {
+        $count = 0;
+        foreach ($this->events as $event) {
+            $count += count($event['values']);
+        }
+
+        return $count;
     }
 
     /**
@@ -56,22 +101,24 @@ class Client
      *
      * @param bool $failSilent
      *
+     * @throws \Throwable
      * @throws RequestException
-     * @throws GuzzleException
      */
-    public static function flush($failSilent = false)
+    public function flush($failSilent = true)
     {
-        if (empty(self::$events) || !self::$client) {
+        if (empty($this->events) || !$this->httpClient) {
             return;
         }
 
         try {
-            self::$client->request('post', self::$options->getUrl(), [
-                'json' => array_values(self::$events),
+            $this->httpClient->request('post', $this->options->getUrl(), [
+                'json' => array_values($this->events),
             ]);
+
+            $this->events = [];
         } catch (GuzzleRequestException $exception) {
-            if (self::$logger) {
-                self::$logger->error('Cannot send metrics to Quickmetrics.', [
+            if ($this->logger) {
+                $this->logger->error('Cannot send metrics to Quickmetrics.', [
                     'exception'   => $exception->getMessage(),
                     'code'        => $exception->getCode(),
                     'status_code' => $exception->hasResponse() ? $exception->getResponse()->getStatusCode() : null,
@@ -81,9 +128,9 @@ class Client
             if (!$failSilent) {
                 throw RequestException::fromGuzzleRequestException($exception);
             }
-        } catch (GuzzleException $exception) {
-            if (self::$logger) {
-                self::$logger->error('Cannot send metrics to Quickmetrics.', [
+        } catch (\Throwable $exception) {
+            if ($this->logger) {
+                $this->logger->error('Cannot send metrics to Quickmetrics.', [
                     'exception' => $exception->getMessage(),
                     'code'      => $exception->getCode(),
                 ]);
@@ -96,36 +143,10 @@ class Client
     }
 
     /**
-     * Tracks a event with the current timestamp.
-     *
-     * @param string $name
-     * @param float|int $value
-     * @param string|null $dimension
-     * @param int|null $timestamp
-     *
-     * @throws GuzzleException
+     * @return array
      */
-    public static function event($name, $value, $dimension = null, $timestamp = null)
+    public function getEvents()
     {
-        $key = $name . $dimension;
-
-        if (isset(self::$events[$key])) {
-            self::$events[$key]['values'][] = [$timestamp ?: time(), $value];
-
-            return;
-        }
-
-        self::$events[$key] = [
-            'name'      => $name,
-            'dimension' => $dimension,
-            'values'    => [
-                [$timestamp ?: time(), $value],
-            ],
-        ];
-
-        $maxBatchSize = self::$options->getMaxBatchSize();
-        if ($maxBatchSize && count(self::$events) >= $maxBatchSize) {
-            self::flush();
-        }
+        return $this->events;
     }
 }

@@ -42,9 +42,6 @@
         }
     },
     "scripts": {
-        "phpstan": [
-            "vendor/bin/phpstan analyse"
-        ]
     },
     "config": {
         "sort-packages": true
