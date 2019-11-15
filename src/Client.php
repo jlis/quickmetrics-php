@@ -37,9 +37,9 @@ final class Client
     ) {
         $this->options = new Options($apiKey, $options);
         $this->httpClient = $httpClient ?: new \GuzzleHttp\Client([
-            'headers'         => ['X-QM-KEY' => $options->getApiKey()],
-            'timeout'         => $options->getTimeout(),
-            'connect_timeout' => $options->getConnectTimeout(),
+            'headers'         => ['X-QM-KEY' => $this->options->getApiKey()],
+            'timeout'         => $this->options->getTimeout(),
+            'connect_timeout' => $this->options->getConnectTimeout(),
         ]);
         $this->logger = $logger;
     }
