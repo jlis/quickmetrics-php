@@ -17,7 +17,7 @@ final class Options
 
     /**
      * @param string $apiKey
-     * @param array  $options
+     * @param array $options
      */
     public function __construct($apiKey, array $options = [])
     {
@@ -44,7 +44,19 @@ final class Options
         $resolver->setAllowedTypes('connect_timeout', 'int');
         $resolver->setAllowedTypes('flush_on_shutdown', 'bool');
 
-        $resolver->setAllowedValues('url', \Closure::fromCallable([$this, 'validateUrl']));
+        $resolver->setAllowedValues('url', function ($value) {
+            return $this->validateUrl($value);
+        });
+    }
+
+    /**
+     * @param string $url
+     *
+     * @return bool
+     */
+    private function validateUrl($url)
+    {
+        return filter_var($url, FILTER_VALIDATE_URL);
     }
 
     /**
@@ -101,15 +113,5 @@ final class Options
     public function isFlushableOnShutdown()
     {
         return $this->options['flush_on_shutdown'];
-    }
-
-    /**
-     * @param string $url
-     *
-     * @return bool
-     */
-    private function validateUrl($url)
-    {
-        return filter_var($url, FILTER_VALIDATE_URL);
     }
 }
