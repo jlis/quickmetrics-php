@@ -1,6 +1,6 @@
 {
     "name": "jlis/quickmetrics-php",
-    "description": "A inofficial PHP client for Quickmetrics (quickmetrics.io)",
+    "description": "A unofficial PHP client for Quickmetrics (quickmetrics.io)",
     "type": "library",
     "keywords": [
         "quickmetrics",
