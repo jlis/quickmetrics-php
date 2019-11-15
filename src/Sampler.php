@@ -18,8 +18,7 @@ final class Sampler
     }
 
     /**
-     * @param float    $sampleRate
-     * @param \Closure $closure
+     * @param float $sampleRate
      */
     public function sample($sampleRate, \Closure $closure)
     {

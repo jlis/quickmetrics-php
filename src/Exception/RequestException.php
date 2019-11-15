@@ -14,8 +14,6 @@ class RequestException extends \RuntimeException
     private $statusCode;
 
     /**
-     * @param GuzzleRequestException $exception
-     *
      * @return RequestException
      */
     public static function fromGuzzleRequestException(GuzzleRequestException $exception)

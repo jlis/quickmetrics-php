@@ -17,7 +17,6 @@ final class Options
 
     /**
      * @param string $apiKey
-     * @param array  $options
      */
     public function __construct($apiKey, array $options = [])
     {
@@ -31,18 +30,16 @@ final class Options
     private function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'url'               => 'https://qckm.io/list',
-            'max_batch_size'    => 100,
-            'timeout'           => 1,
-            'connect_timeout'   => 1,
-            'flush_on_shutdown' => true,
+            'url'             => 'https://qckm.io/list',
+            'max_batch_size'  => 100,
+            'timeout'         => 1,
+            'connect_timeout' => 1,
         ]);
 
         $resolver->setAllowedTypes('url', 'string');
         $resolver->setAllowedTypes('max_batch_size', 'int');
         $resolver->setAllowedTypes('timeout', 'int');
         $resolver->setAllowedTypes('connect_timeout', 'int');
-        $resolver->setAllowedTypes('flush_on_shutdown', 'bool');
 
         $resolver->setAllowedValues('url', function ($value) {
             return $this->validateUrl($value);
@@ -105,13 +102,5 @@ final class Options
     public function getConnectTimeout()
     {
         return $this->options['connect_timeout'];
-    }
-
-    /**
-     * @return bool
-     */
-    public function isFlushableOnShutdown()
-    {
-        return $this->options['flush_on_shutdown'];
     }
 }

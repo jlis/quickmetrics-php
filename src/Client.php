@@ -26,15 +26,11 @@ final class Client
      */
     private $logger;
 
-    /**
-     * Initializes the Quickmetrics client.
-     *
-     * @param Options              $options
-     * @param ClientInterface|null $httpClient
-     * @param LoggerInterface      $logger
-     */
-    public function __construct(Options $options, ClientInterface $httpClient = null, LoggerInterface $logger = null)
-    {
+    public function __construct(
+        Options $options,
+        ClientInterface $httpClient = null,
+        LoggerInterface $logger = null
+    ) {
         $this->options = $options;
         $this->httpClient = $httpClient ?: new \GuzzleHttp\Client([
             'headers'         => ['X-QM-KEY' => $options->getApiKey()],
@@ -42,12 +38,6 @@ final class Client
             'connect_timeout' => $options->getConnectTimeout(),
         ]);
         $this->logger = $logger;
-
-        if ($options->isFlushableOnShutdown()) {
-            register_shutdown_function(function () {
-                $this->flush();
-            });
-        }
     }
 
     /**
@@ -108,7 +98,7 @@ final class Client
      */
     public function flush($failSilent = true)
     {
-        if (empty($this->events) || !$this->httpClient) {
+        if (! $this->countEventValues() || ! $this->httpClient) {
             return;
         }
 
@@ -127,7 +117,7 @@ final class Client
                 ]);
             }
 
-            if (!$failSilent) {
+            if (! $failSilent) {
                 throw RequestException::fromGuzzleRequestException($exception);
             }
         } catch (\Throwable $exception) {
@@ -138,7 +128,7 @@ final class Client
                 ]);
             }
 
-            if (!$failSilent) {
+            if (! $failSilent) {
                 throw $exception;
             }
         }
