@@ -5,7 +5,7 @@ namespace Jlis\Quickmetrics\Random;
 class RandomGenerator implements RandomGeneratorInterface
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getRandomNumber($min, $max)
     {

@@ -2,10 +2,10 @@
 
 namespace Jlis\Quickmetrics;
 
-use Psr\Log\LoggerInterface;
 use GuzzleHttp\ClientInterface;
-use Jlis\Quickmetrics\Exception\RequestException;
 use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
+use Jlis\Quickmetrics\Exception\RequestException;
+use Psr\Log\LoggerInterface;
 
 final class Client
 {
@@ -29,9 +29,9 @@ final class Client
     /**
      * Initializes the Quickmetrics client.
      *
-     * @param Options $options
+     * @param Options              $options
      * @param ClientInterface|null $httpClient
-     * @param LoggerInterface $logger
+     * @param LoggerInterface      $logger
      */
     public function __construct(Options $options, ClientInterface $httpClient = null, LoggerInterface $logger = null)
     {
@@ -51,17 +51,17 @@ final class Client
     /**
      * Tracks a event with the current timestamp.
      *
-     * @param string $name
-     * @param float|int $value
+     * @param string      $name
+     * @param float|int   $value
      * @param string|null $dimension
-     * @param int|null $timestamp
+     * @param int|null    $timestamp
      *
      * @throws \Throwable
      * @throws RequestException
      */
     public function event($name, $value, $dimension = null, $timestamp = null)
     {
-        $key = $name . $dimension;
+        $key = $name.$dimension;
 
         if (isset($this->events[$key])) {
             $this->events[$key]['values'][] = [$timestamp ?: time(), $value];

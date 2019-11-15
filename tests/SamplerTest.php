@@ -2,8 +2,8 @@
 
 namespace Jlis\Quickmetrics\Tests;
 
-use Jlis\Quickmetrics\Sampler;
 use Jlis\Quickmetrics\Random\RandomGeneratorInterface;
+use Jlis\Quickmetrics\Sampler;
 
 class SamplerTest extends \PHPUnit_Framework_TestCase
 {
