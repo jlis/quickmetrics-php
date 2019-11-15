@@ -44,7 +44,7 @@ final class Client
         $this->logger = $logger;
 
         if ($options->isFlushableOnShutdown()) {
-            register_shutdown_function(function() {
+            register_shutdown_function(function () {
                 $this->flush();
             });
         }
